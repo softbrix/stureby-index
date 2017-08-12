@@ -1,0 +1,38 @@
+{
+  "name": "shatabang_index",
+  "version": "1.0.0",
+  "description": "A simple index which will be persisted on the disk during runtime.",
+  "main": "index.js",
+  "scripts": {
+    "pretest": "rm -rf ./test/data*",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/softbrix/shatabang_index.git"
+  },
+  "keywords": [
+    "node",
+    "index",
+    "javascript",
+    "persisted",
+    "in",
+    "memory",
+    "string"
+  ],
+  "author": "Andreas Sehr",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/softbrix/shatabang_index/issues"
+  },
+  "homepage": "https://github.com/softbrix/shatabang_index#readme",
+  "dependencies": {
+    "fs-extra": "^4.0.1",
+    "stringset": "^0.2.1",
+    "touch": "^3.1.0",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "mocha": "3.2.0"
+  }
+}
