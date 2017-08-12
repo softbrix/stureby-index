@@ -4,7 +4,7 @@
   "description": "A simple index which will be persisted on the disk during runtime.",
   "main": "index.js",
   "scripts": {
-    "pretest": "rm -rf ./test/data*",
+    "pretest": "rm -rf ./test/data* ./test/vx_data",
     "test": "mocha"
   },
   "repository": {
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/softbrix/stureby_index#readme",
   "dependencies": {
     "fs-extra": "^4.0.1",
+    "stringmap": "^0.2.2",
     "stringset": "^0.2.1",
     "touch": "^3.1.0",
     "underscore": "^1.8.3"

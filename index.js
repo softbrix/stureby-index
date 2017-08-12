@@ -10,7 +10,9 @@ var fs = require('fs-extra');
 var path = require('path');
 var touch = require("touch");
 var StringSet = require("stringset");
+var StringMap = require("stringmap");
 
+const IDX_VERSION = 2;
 const MASTER_KEY_FILE_NAME = '__allKeys';
 const DEFAULT_ENCODING = 'utf8';
 const CHARS='abcdefghijklmnopqrstuvwxyz';
@@ -23,17 +25,6 @@ var touchFile = function(filepath) {
     fs.mkdirpSync(dirpath);
   }
   touch.sync(filepath);
-};
-
-
-var getIdFromKey = function(key) {
-  var sanitized = key.replace(/[^\d\w.]+/g, '');
-  var num = parseInt(sanitized, 36);
-  if(isNaN(num)) {
-    num = 1;
-  }
-  //console.log(num);
-  return ((num * 11) % CHARS.length) + 1;
 };
 
 /**
@@ -64,38 +55,63 @@ var addValue = function(idx, key, value) {
     idx[key] = new StringSet();
   }
   idx[key].add(value);
-  // console.log('__idx', key, idx);
 };
 
 module.exports = function(pathToUse) {
+
+  var getFileFromIndex = function(idx) {
+    return path.join(pathToUse, CHARS.charAt(idx-1));
+  };
+
+  var getIndexForId = function(id) {
+    var i = (id % CHARS.length) + 1;
+    if(_.isUndefined(_idx[i])) {
+      _idx[i] = readFile(getFileFromIndex(i));
+    }
+    return _idx[i];
+  };
+
   var getMasterKeyFile = function() {
     var fileName = path.join(pathToUse, MASTER_KEY_FILE_NAME);
     touchFile(fileName);
     return fileName;
   };
 
-  var _idx = [new StringSet()];
+  // Initialize the keys index
+  var _idx = [new StringMap()],
+  _keys = _idx[0],
+  _counter = 1;
 
   // Load old master key file
   var data = fs.readFileSync(getMasterKeyFile(), DEFAULT_ENCODING);
   if(!_.isEmpty(data)) {
     var parsed = JSON.parse(data);
-    parsed.forEach(function(itm) {
-      _idx[0].add(itm);
-    });
+    if(_.isUndefined(parsed.version)) {
+      // Version 1
+      parsed.forEach(function(itm) {
+        _keys.set(itm, _counter++);
+      });
+      _.times(CHARS.length, (i) => {
+        var oldIndex = readFile(getFileFromIndex(i));
+        _.each(oldIndex, function(keySet, key) {
+          var id = _keys.get(key);
+
+          var idx = getIndexForId(id);
+          keySet.items().forEach(value => addValue(idx, id, value));
+        });
+      })
+
+    } else {
+      // Version 2
+      parsed.items.forEach(function(itm) {
+        _keys.set(itm[0], itm[1]);
+      });
+    }
   }
 
-  var getIndexFromKey = function(key) {
-    var i = getIdFromKey(key);
-    if(_.isUndefined(_idx[i])) {
-      _idx[i] = readFile(getFileFromIndex(i));
-    }
-    // console.log('__i', i);
-    return _idx[i];
-  };
-
-  var getFileFromIndex = function(idx) {
-    return path.join(pathToUse, CHARS.charAt(idx-1));
+  var writeMasterFile = function(list, fileName) {
+    touchFile(fileName);
+    return fs.writeFile(fileName, JSON.stringify({version: IDX_VERSION, items: list}));
   };
 
   var writeFile = function(list, fileName) {
@@ -112,7 +128,7 @@ module.exports = function(pathToUse) {
   };
 
   var flush = function() {
-    writeFile(_idx[0].items(), getMasterKeyFile());
+    writeMasterFile(_keys.items(), getMasterKeyFile());
     _.times(CHARS.length, function(i) {
       ++i;
       if(_.isEmpty(_idx[i])) {
@@ -134,44 +150,45 @@ module.exports = function(pathToUse) {
         key.length === 0 || value.length === 0) {
         return;
       }
-      var idx = getIndexFromKey(key);
 
-      // console.log('__idx', idx);
+      var id = _keys.get(key);
+      if(id === undefined) {
+        id = _counter++;
+        _keys.set(key, id);
+      }
 
-      addValue(idx, key, value);
-
-      _idx[0].add(key);
-
+      var idx = getIndexForId(id);
+      addValue(idx, id, value);
       throttled_flush();
     },
     /**
      Return all items for the matching key
      */
     get : function(key) {
-      if(!_.isString(key) || key.length === 0 ) {
-        return [];
+      if(_.isString(key) && key.length >= 0 ) {
+        var id = _keys.get(key);
+        if(!_.isUndefined(id)) {
+          var idx = getIndexForId(id);
+          if(!_.isUndefined(idx[id])) {
+            return idx[id].items();
+          }
+        }
       }
-
-      var idx = getIndexFromKey(key);
-
-      if(_.isUndefined(idx[key])) {
-        return [];
-      }
-      return idx[key].items();
+      return [];
     },
     /**
     Search for matching keys.
     Only a list of keys is returned which then can be used to lookup the values.
     **/
     search : function(searchStr) {
-      var keys = _idx[0].items();
+      var keys = _idx[0].keys();
       return _.filter(keys, function(item){ return item.indexOf(searchStr) >= 0; });
     },
     /**
     The list of stored keys
     */
     keys : function() {
-      return _idx[0].items();
+      return _idx[0].keys();
     },
     /**
     The flush method is internal and should not be called externally

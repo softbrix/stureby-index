@@ -13,6 +13,13 @@ The same key can be linked to multiple values.
 
 The search method will return a list of matched keys.
 
+## Flush before process exists
+```
+  if(!_.isUndefined(process)) {
+    process.on('SIGINT', indexObject.flush);
+  }
+```
+
 ## Why Stureby?
 Stureby is a small area in the southern suburbs of Stockholm, Sweden. This is a
 calm and child friendly area having mostly small houses and private villas.
