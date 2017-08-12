@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+- node
+install:
+- npm install
+script:
+- npm test
+deploy:
+  provider: npm
+  email: andreas@softbrix.se
+  api_key:
+    secure: 3MwlYjAuOiUiMxaoNKJ8rL7X3B/vOWn8xGav4pQArJnsoD/GQ0MAyn2sjYMhdrONrhykAeSqMDxVD3StwVFUrWHHVZYQeaGhpXWOnfrQd2fxOWg2GtbD0SbfsucsOWDufiMhM4fiW+QbIZPw4VcLTv96Pqc9H+gMJqODEDJKn8CTsDBzOpO50vsewaETxRhwRPV8wKbqRuaYOBQ78scoWmxBFNrGv9uomfJJvDAHHqvKLfb4ie+R8arpadMEHpF4m0IIk85N8Ddq4PNcjyD+877SGzyAy92cvwqTMqanfc0qFDkaqgkzcCPPojxHRBT9+PrebdD542l7tnncb5hepyDWZwHlj0Xw93SynvMhG8LvYvFwoSPxHIEKACzH09zrhg5uRrvsMwwxj/Wi+mHdd7kHAFLRFwdKaKtuQe1Q4HduALQywCjqX9q5pGpOvr9LbuTvnxO3+mF51qkqqgnbuBJf8t8hZHoXepJ3CGBcG+bSS3yVCAr/fLngq1t9Hs4NoglqxI+htuaK/Ee7bt1i/xpA0HrEBzaRW8f/kaEMZd1BFJBjfvsw3rEmO4G5qBrT9dbSpNlxibBimpV09bEeZMTxXVMYauPf8SIfBdLPtSqpXFoEqSgiBbiyetKjnD93WYQyi8eCCWitKS750ToBfvAVA01+khw1nEFEuCsBTa0=
+  on:
+    tags: true
+    repo: softbrix/stureby_index
