@@ -12,6 +12,7 @@ var touch = require("touch");
 var StringSet = require("stringset");
 var StringMap = require("stringmap");
 var fileStorage = require("./file_storage");
+var noopStorage = require("./noop_storage");
 
 const IDX_VERSION = 2;
 const CHARS='abcdefghijklmnopqrstuvwxyz';
@@ -23,9 +24,19 @@ var addValue = function(idx, key, value) {
   idx[key].add(value);
 };
 
-module.exports = function(pathToUse) {
+module.exports = function(pathToUse, options) {
 
-  var storage = fileStorage(pathToUse);
+  options = options || {};
+  var storage;
+  if(_.isUndefined(options.storageFactory)) {
+    if(_.isUndefined(options.persist) || options.persist) {
+        storage = fileStorage(pathToUse);
+    } else {
+      storage = noopStorage();
+    }
+  } else {
+    storage = options.storageFactory(pathToUse);
+  }
 
   /**
   Read the index items from the block

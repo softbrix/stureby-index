@@ -13,6 +13,14 @@ The same key can be linked to multiple values.
 
 The search method will return a list of matched keys.
 
+## Version 2
+The new version is backwards compatible with version 1 of the index. The index
+will be upgraded and once it is flushed back to disk the process is not reversible.
+
+### Don't persist on disk
+In this version it is possible to create a index without the disk access. The
+options parameter should include persist false which will use the noop_storage.
+
 ## Flush before process exists
 ```
   if(!_.isUndefined(process)) {
