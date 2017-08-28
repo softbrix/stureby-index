@@ -45,7 +45,7 @@ module.exports = function(pathToUse) {
     writeMasterBlock : function(list, version) {
       const fileName = getMasterKeyFile();
       touchFile(fileName);
-      return fs.writeFile(fileName, JSON.stringify({version: version, items: list}));
+      return fs.writeFileSync(fileName, JSON.stringify({version: version, items: list}));
     },
     readMasterBlock : function() {
       var data = fs.readFileSync(getMasterKeyFile(), DEFAULT_ENCODING);
@@ -57,7 +57,7 @@ module.exports = function(pathToUse) {
     writeBlock : function(list, block) {
       const fileName = blockFileName(block);
       touchFile(fileName);
-      return fs.writeFile(fileName, JSON.stringify(list));
+      return fs.writeFileSync(fileName, JSON.stringify(list));
     }
   };
 };
