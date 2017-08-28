@@ -51,6 +51,18 @@ describe('Shatabang Index', function() {
     assert.deepEqual([VAL1], idx.get(KEY));
   });
 
+  it('should be able to reopen index and add new items', function() {
+    const KEY1 = 'asaklint';
+    const VAL1 = 'the beste no 1';
+    for(var i = 0; i < 3; ++i) {
+      var tmpIdx = shIndex('./test/data');
+      tmpIdx.put(KEY1, VAL1+i);
+      tmpIdx.flush(true);
+    }
+    var tmpIdx = shIndex('./test/data');
+    assert.equal(3, tmpIdx.get(KEY1).length);
+  });
+
   it('should handle put plenty items in single file', () => {
     var k = "D5320";
     const noOfItems = 10000;

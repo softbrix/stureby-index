@@ -98,6 +98,7 @@ module.exports = function(pathToUse, options) {
       });
     }
   }
+  _counter = _keys.items().length;
 
   var getIndexAsList = function(index) {
     var list = {};
@@ -119,7 +120,7 @@ module.exports = function(pathToUse, options) {
     });
   };
 
-  var throttled_flush = _.throttle(flush, 5000);
+  var throttled_flush = _.throttle(flush, 500);
 
   return {
     clear: function() {
