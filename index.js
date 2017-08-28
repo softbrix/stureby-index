@@ -112,6 +112,10 @@ module.exports = function(pathToUse, options) {
     storage.writeMasterBlock(_keys.items(), IDX_VERSION);
     _.times(CHARS.length, function(i) {
       const block = getBlockFromIndex(i);
+      if(_.isUndefined(_idx[i])) {
+        // Ignore non loaded blocks
+        return;
+      }
       if(_.isEmpty(_idx[i])) {
         storage.clearBlock(block);
         return;
