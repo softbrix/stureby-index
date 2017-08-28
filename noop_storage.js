@@ -7,6 +7,7 @@ not be restored when the process ends.
 */
 module.exports = function(pathToUse) {
   return {
+    clearBlock : _.noop, 
     readBlock : _.noop,
     writeMasterBlock : _.noop,
     readMasterBlock : _.noop,

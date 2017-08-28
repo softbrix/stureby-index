@@ -30,6 +30,10 @@ module.exports = function(pathToUse) {
   };
 
   return {
+    clearBlock : function(block) {
+      const fileName = blockFileName(block);
+      fs.removeSync(fileName);
+    },
     readBlock : function(block) {
       const fileName = blockFileName(block);
       var data = fs.readFileSync(fileName, DEFAULT_ENCODING);

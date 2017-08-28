@@ -105,5 +105,13 @@ describe('Shatabang Index', function() {
     it('should be able to flush to disk', () => {
         return idx.flush(true);
     });
+
+    it('should be able to clear', () => {
+        idx.clear();
+
+        // Reload the index
+        const idx_cleared = shIndex('./test/data_big');
+        assert.equal(0, idx_cleared.keys().length);
+    });
   });
 });

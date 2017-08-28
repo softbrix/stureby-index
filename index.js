@@ -58,11 +58,11 @@ module.exports = function(pathToUse, options) {
   };
 
   var getBlockFromIndex = function(idx) {
-    return CHARS.charAt(idx-1);
+    return CHARS.charAt(idx);
   };
 
   var getIndexForId = function(id) {
-    var i = (id % CHARS.length) + 1;
+    var i = (id % CHARS.length);
     if(_.isUndefined(_idx[i])) {
       _idx[i] = readBlock(getBlockFromIndex(i));
     }
@@ -70,8 +70,8 @@ module.exports = function(pathToUse, options) {
   };
 
   // Initialize the keys index
-  var _idx = [new StringMap()],
-  _keys = _idx[0],
+  var _idx = [],
+  _keys = new StringMap(),
   _counter = 1;
 
   // Load old master key block
@@ -110,17 +110,25 @@ module.exports = function(pathToUse, options) {
   var flush = function() {
     storage.writeMasterBlock(_keys.items(), IDX_VERSION);
     _.times(CHARS.length, function(i) {
-      ++i;
+      const block = getBlockFromIndex(i);
       if(_.isEmpty(_idx[i])) {
+        storage.clearBlock(block);
         return;
       }
-      storage.writeBlock(getIndexAsList(_idx[i]), getBlockFromIndex(i));
+      storage.writeBlock(getIndexAsList(_idx[i]), block);
     });
   };
 
   var throttled_flush = _.throttle(flush, 5000);
 
   return {
+    clear: function() {
+      _keys = new StringMap();
+      _counter = 0;
+      _.times(CHARS.length, (i) => _idx[i] = {} );
+      flush();
+    },
+
     /**
     Expects a key string and value string as parameters. These will be added to
     the internal index
@@ -161,14 +169,14 @@ module.exports = function(pathToUse, options) {
     Only a list of keys is returned which then can be used to lookup the values.
     **/
     search : function(searchStr) {
-      var keys = _idx[0].keys();
+      var keys = _keys.keys();
       return _.filter(keys, function(item){ return item.indexOf(searchStr) >= 0; });
     },
     /**
     The list of stored keys
     */
     keys : function() {
-      return _idx[0].keys();
+      return _keys.keys();
     },
     /**
     The flush method is internal and should not be called externally
