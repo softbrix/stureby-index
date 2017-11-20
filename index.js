@@ -124,6 +124,13 @@ module.exports = function(pathToUse, options) {
     });
   };
 
+  var getIdFromKey = function(key) {
+    if(_.isString(key) && key.length >= 0 ) {
+      return _keys.get(key);
+    }
+    return undefined;
+  }
+
   var throttled_flush = _.throttle(flush, 500);
 
   return {
@@ -132,6 +139,16 @@ module.exports = function(pathToUse, options) {
       _counter = 0;
       _.times(CHARS.length, (i) => _idx[i] = {} );
       flush();
+    },
+
+    delete: function(key) {
+      var id = getIdFromKey(key);
+      if(!_.isUndefined(id)) {
+        var idx = getIndexForId(id);
+        if(!_.isUndefined(idx[id])) {
+          delete idx[id];
+        }
+      }
     },
 
     /**
@@ -158,13 +175,11 @@ module.exports = function(pathToUse, options) {
      Return all items for the matching key
      */
     get : function(key) {
-      if(_.isString(key) && key.length >= 0 ) {
-        var id = _keys.get(key);
-        if(!_.isUndefined(id)) {
-          var idx = getIndexForId(id);
-          if(!_.isUndefined(idx[id])) {
-            return idx[id].items();
-          }
+      var id = getIdFromKey(key);
+      if(!_.isUndefined(id)) {
+        var idx = getIndexForId(id);
+        if(!_.isUndefined(idx[id])) {
+          return idx[id].items();
         }
       }
       return [];

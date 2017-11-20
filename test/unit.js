@@ -63,6 +63,21 @@ describe('Shatabang Index', function() {
       assert.deepEqual(expected, idx.toJSON());
   });
 
+  it('should handle delete by valid key', () => {
+    const KEY = 'asa';
+    assert.equal(3, idx.get(KEY).length);
+    idx.delete(KEY);
+    assert.deepEqual([], idx.get(KEY));
+  });
+
+  it('should handle delete by unused key', () => {
+    const KEY = 'asakrassa';
+    assert.deepEqual([], idx.get(KEY));
+    idx.delete(KEY);
+    assert.deepEqual([], idx.get(KEY));
+  });
+
+
   it('should be able to reopen index and add new items', function() {
     const KEY1 = 'asaklint';
     const VAL1 = 'the beste no 1';
