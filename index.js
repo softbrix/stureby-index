@@ -184,6 +184,18 @@ module.exports = function(pathToUse, options) {
       return _keys.keys();
     },
     /**
+    The index is returned as a json object
+    */
+    toJSON : function() {
+      var obj = {};
+      var keys = _keys.keys();
+      for(var x in keys) {
+        var key = keys[x];
+        obj[key] = this.get(key);
+      }
+      return obj;
+    },
+    /**
     The flush method is internal and should not be called externally
     **/
     flush: function(force) {
