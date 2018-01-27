@@ -72,7 +72,7 @@ module.exports = function(pathToUse, options) {
   // Initialize the keys index
   var _idx = [],
   _keys = new StringMap(),
-  _counter = 1;
+  _counter = 0;
 
   // Load old master key block
   var parsed = storage.readMasterBlock();
@@ -80,7 +80,7 @@ module.exports = function(pathToUse, options) {
     if(_.isUndefined(parsed.version)) {
       // Version 1
       parsed.forEach(function(itm) {
-        _keys.set(itm, _counter++);
+        _keys.set(itm, ++_counter);
       });
       _.times(CHARS.length, (i) => {
         var oldIndex = readBlock(getBlockFromIndex(i));
@@ -207,6 +207,10 @@ module.exports = function(pathToUse, options) {
     */
     keys : function() {
       return _keys.keys();
+    },
+    /** Return the number of keys in the index */
+    size : function() {
+      return _counter;
     },
     /**
     The index is returned as a json object

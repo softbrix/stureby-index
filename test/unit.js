@@ -7,6 +7,7 @@ describe('Shatabang Index', function() {
   const idx = shIndex('./test/data');
 
   it('should return empty array for unknown key', function() {
+    assert.equal(0, idx.size());
     assert.deepEqual([], idx.get('aaa'));
     assert.deepEqual([], idx.search('aaa'));
   });
@@ -20,6 +21,7 @@ describe('Shatabang Index', function() {
     idx.put('asasas', 'the beste4');
 
     assert.equal(4, idx.keys().length);
+    assert.equal(4, idx.size());
   });
 
   it('should handle wide search in different keys', () => {
