@@ -77,6 +77,23 @@ describe('Shatabang Index', function() {
     assert.deepEqual([], idx.get(KEY));
   });
 
+  it('should handle update by valid key', () => {
+    const KEY = 'asaba';
+    const NEW_VALUE = 'ABC123';
+    idx.put(KEY, NEW_VALUE);
+    assert.equal(1, idx.get(KEY).length);
+    idx.update(KEY, NEW_VALUE);
+    assert.deepEqual([NEW_VALUE], idx.get(KEY));
+  });
+
+  it('should handle update by unused key', () => {
+    const KEY = 'asakrassa';
+    const NEW_VALUE = 'KULBANA';
+    assert.deepEqual([], idx.get(KEY));
+    idx.update(KEY, NEW_VALUE);
+    assert.deepEqual([NEW_VALUE], idx.get(KEY));
+  });
+
 
   it('should be able to reopen index and add new items', function() {
     const KEY1 = 'asaklint';
@@ -104,6 +121,7 @@ describe('Shatabang Index', function() {
 
   it('should distribute random data with multiple values on same key', () => {
     var noOfItems = 1000;
+    const PREV_KEY_LENGTH = idx.keys().length;
 
     /* Fill with garbage **/
     _.times(noOfItems, function(n) {
@@ -116,7 +134,7 @@ describe('Shatabang Index', function() {
       });
     });
 
-    assert.equal(1006, idx.keys().length);
+    assert.equal(PREV_KEY_LENGTH + noOfItems, idx.keys().length);
   });
 
   it('should be able to flush to disk', () => {

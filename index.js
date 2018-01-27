@@ -134,6 +134,7 @@ module.exports = function(pathToUse, options) {
   var throttled_flush = _.throttle(flush, 500);
 
   return {
+    /** Clear the entire index */
     clear: function() {
       _keys = new StringMap();
       _counter = 0;
@@ -141,6 +142,7 @@ module.exports = function(pathToUse, options) {
       flush();
     },
 
+    /* Delete a key */
     delete: function(key) {
       var id = getIdFromKey(key);
       if(!_.isUndefined(id)) {
@@ -171,6 +173,7 @@ module.exports = function(pathToUse, options) {
       addValue(idx, id, value);
       throttled_flush();
     },
+
     /**
      Return all items for the matching key
      */
@@ -184,6 +187,13 @@ module.exports = function(pathToUse, options) {
       }
       return [];
     },
+
+    /** Update a key is remove then put */
+    update : function(key, value) {
+      this.delete(key);
+      this.put(key, value);
+    },
+
     /**
     Search for matching keys.
     Only a list of keys is returned which then can be used to lookup the values.
