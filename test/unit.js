@@ -143,6 +143,22 @@ describe('Shatabang Index', function() {
       return idx.flush(true);
   });
 
+  describe('simultaneous read and write', function() {
+    const PATH = './test/data';
+    //const idx = shIndex(PATH);
+    const idx2 = shIndex(PATH);
+
+    it('should be able to sync data between instances in same process', () => {
+      const KEY = 'Netflix';
+      const VALUE = 'The Crown';
+      assert.deepEqual([], idx.get(KEY));
+      assert.deepEqual([], idx2.get(KEY));
+      idx.update(KEY, VALUE);
+      assert.deepEqual([VALUE], idx.get(KEY));
+      assert.deepEqual([VALUE], idx2.get(KEY));
+    });
+  });
+
   describe('big Index', function() {
     const idx = shIndex('./test/data_big');
     it('should distribute random data with single value on same key', () => {

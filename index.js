@@ -24,7 +24,13 @@ var addValue = function(idx, key, value) {
   idx[key].add(value);
 };
 
+const index_cache = {};
+
 module.exports = function(pathToUse, options) {
+
+  if(index_cache[pathToUse] !== undefined) {
+    return index_cache[pathToUse];
+  }
 
   options = options || {};
   var storage;
@@ -133,24 +139,13 @@ module.exports = function(pathToUse, options) {
 
   var throttled_flush = _.throttle(flush, 500);
 
-  return {
+  index_cache[pathToUse] = {
     /** Clear the entire index */
     clear: function() {
       _keys = new StringMap();
       _counter = 0;
       _.times(CHARS.length, (i) => _idx[i] = {} );
       flush();
-    },
-
-    /* Delete a key */
-    delete: function(key) {
-      var id = getIdFromKey(key);
-      if(!_.isUndefined(id)) {
-        var idx = getIndexForId(id);
-        if(!_.isUndefined(idx[id])) {
-          delete idx[id];
-        }
-      }
     },
 
     /**
@@ -186,6 +181,17 @@ module.exports = function(pathToUse, options) {
         }
       }
       return [];
+    },
+
+    /* Delete a key */
+    delete: function(key) {
+      var id = getIdFromKey(key);
+      if(!_.isUndefined(id)) {
+        var idx = getIndexForId(id);
+        if(!_.isUndefined(idx[id])) {
+          delete idx[id];
+        }
+      }
     },
 
     /** Update a key is remove then put */
@@ -235,4 +241,5 @@ module.exports = function(pathToUse, options) {
       }
     }
   };
+  return index_cache[pathToUse];
 };
