@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/softbrix/stureby_index.svg?branch=master)](https://travis-ci.org/softbrix/stureby_index)
+[![Build Status](https://travis-ci.org/softbrix/stureby-index.svg?branch=master)](https://travis-ci.org/softbrix/stureby-index)
 
 # Stureby Index
 This is an simple index or cache for javascript.
@@ -6,20 +6,20 @@ This is an simple index or cache for javascript.
 Install the module simply with npm or yarn
 
 ```
-npm i --save stureby_index
+npm i --save stureby-index
 ```
 
 or
 
 ```
-yarn add stureby_index
+yarn add stureby-index
 ```
 
-Create the index instance by simply requiring the stureby_index module and create a
+Create the index instance by simply requiring the stureby-index module and create a
 new instance of the object.
 
 ```
-var shIndex = require('stureby_index');
+var shIndex = require('stureby-index');
 const idx = shIndex(idxPath);
 ```
 
