@@ -6,7 +6,7 @@ var shIndex = require('../index.js');
 Write example data for new test case
 */
 describe('Shatabang Index writer', function() {
-  const idx = shIndex('./test/vx_data');
+  const idx = shIndex('./test/data_vx');
 
   it('should return empty array for unknown key', function() {
     assert.deepEqual([], idx.get('aaa'));
