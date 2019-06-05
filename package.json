@@ -1,5 +1,5 @@
 {
-  "name": "stureby_index",
+  "name": "stureby-index",
   "version": "3.1.1",
   "description": "A simple index which will be persisted on the disk during runtime.",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/softbrix/stureby_index.git"
+    "url": "git+https://github.com/softbrix/stureby-index.git"
   },
   "keywords": [
     "node",
@@ -23,9 +23,9 @@
   "author": "Andreas Sehr",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/softbrix/stureby_index/issues"
+    "url": "https://github.com/softbrix/stureby-index/issues"
   },
-  "homepage": "https://github.com/softbrix/stureby_index#readme",
+  "homepage": "https://github.com/softbrix/stureby-index#readme",
   "dependencies": {
     "fs-extra": "7.0.0",
     "stringmap": "0.2.2",
