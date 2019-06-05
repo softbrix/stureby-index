@@ -43,6 +43,7 @@ module.exports = function(pathToUse, options) {
   } else {
     storage = options.storageFactory(pathToUse);
   }
+  options.flushTime = Number.isInteger(options.flushTime) ? options.flushTime : 500;
 
   /**
   Read the index items from the block
@@ -137,7 +138,7 @@ module.exports = function(pathToUse, options) {
     return undefined;
   }
 
-  var throttled_flush = _.throttle(flush, 500);
+  var throttled_flush = _.throttle(flush, options.flushTime);
 
   index_cache[pathToUse] = {
     /** Clear the entire index */
@@ -191,6 +192,8 @@ module.exports = function(pathToUse, options) {
         if(!_.isUndefined(idx[id])) {
           delete idx[id];
         }
+        _keys.remove(key);
+        throttled_flush();
       }
     },
 

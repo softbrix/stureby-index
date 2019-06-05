@@ -28,6 +28,12 @@ options parameter should include persist false which will use the noop_storage.
   }
 ```
 
+### Options
+
+* storageFactory (undefined) - override the persistant storage to use
+* flushTime (500) - the time in milliseconds between flushing changes back to persisted storage
+* persist (true) - should we persist the index to file or just keep it in memory
+
 ## Why Stureby?
 Stureby is a small area in the southern suburbs of Stockholm, Sweden. This is a
 calm and child friendly area having mostly small houses and private villas.

@@ -1,5 +1,6 @@
 var assert = require('assert');
 var _ = require('underscore');
+var fs = require('fs-extra');
 var shIndex = require('../index.js');
 
 
@@ -77,6 +78,22 @@ describe('Shatabang Index', function() {
     assert.deepEqual([], idx.get(KEY));
     idx.delete(KEY);
     assert.deepEqual([], idx.get(KEY));
+  });
+
+  it('should handle delete by valid key with flush', () => {
+    const KEY = 'DELTE_ME',
+      INDEX = './test/dataDelete',
+      IDX_KEY_FILE = INDEX + '/__allKeys',
+      IDX_FILE = INDEX + '/a';
+    const idx = shIndex(INDEX, {flushTime: 0});
+    idx.clear();
+    assert.equal(24, fs.readFileSync(IDX_KEY_FILE).length);
+    idx.put(KEY, 'Value');
+    assert.equal(true, fs.existsSync(IDX_FILE))
+    assert.equal(38, fs.readFileSync(IDX_KEY_FILE).length);
+    idx.delete(KEY);
+    assert.equal(false, fs.existsSync(IDX_FILE))
+    assert.equal(24, fs.readFileSync(IDX_KEY_FILE).length);
   });
 
   it('should handle update by valid key', () => {
