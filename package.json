@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/softbrix/stureby_index#readme",
   "dependencies": {
-    "fs-extra": "4.0.3",
+    "fs-extra": "7.0.0",
     "stringmap": "0.2.2",
     "stringset": "0.2.1",
     "touch": "3.1.0",
