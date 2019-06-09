@@ -6,9 +6,6 @@ The index stores all information to the file system.
 */
 
 var _ = require('underscore');
-var fs = require('fs-extra');
-var path = require('path');
-var touch = require("touch");
 var StringSet = require("stringset");
 var StringMap = require("stringmap");
 var fileStorage = require("./file_storage");

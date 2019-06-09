@@ -35,5 +35,8 @@
   },
   "devDependencies": {
     "mocha": "6.1.4"
+  },
+  "browser": {
+    "./file_storage.js": "./noop_storage.js"
   }
 }
