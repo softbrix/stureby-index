@@ -6,20 +6,22 @@ The index stores all information to the file system.
 */
 
 var _ = require('underscore');
-var StringSet = require("stringset");
-var StringMap = require("stringmap");
-var fileStorage = require("./file_storage");
-var noopStorage = require("./noop_storage");
+var fileStorage = require('./file_storage');
+var noopStorage = require('./noop_storage');
 
 const IDX_VERSION = 2;
 const CHARS='abcdefghijklmnopqrstuvwxyz';
 
 var addValue = function(idx, key, value) {
   if(_.isUndefined(idx[key])) {
-    idx[key] = new StringSet();
+    idx[key] = new Set();
   }
   idx[key].add(value);
 };
+
+var isValidKey = function(key) {
+  return _.isNumber(key) || _.isString(key) && key.trim().length > 0
+}
 
 const index_cache = {};
 
@@ -75,7 +77,7 @@ module.exports = function(pathToUse, options) {
 
   // Initialize the keys index
   var _idx = [],
-  _keys = new StringMap(),
+  _keys = new Map(),
   _counter = 0;
 
   // Load old master key block
@@ -92,7 +94,7 @@ module.exports = function(pathToUse, options) {
           var id = _keys.get(key);
 
           var idx = getIndexForId(id);
-          keySet.items().forEach(value => addValue(idx, id, value));
+          keySet.forEach(value => addValue(idx, id, value));
         });
       });
     } else {
@@ -102,18 +104,18 @@ module.exports = function(pathToUse, options) {
       });
     }
   }
-  _counter = _keys.items().length;
+  _counter = _keys.size;
 
   var getIndexAsList = function(index) {
     var list = {};
     _.each(index, function(keySet, key) {
-      this[key] = keySet.items();
+      this[key] = keySet.values();
     }, list);
     return list;
   };
 
   var flush = function() {
-    storage.writeMasterBlock(_keys.items(), IDX_VERSION);
+    storage.writeMasterBlock(Array.from(_keys), IDX_VERSION);
     _.times(CHARS.length, function(i) {
       const block = getBlockFromIndex(i);
       if(_.isUndefined(_idx[i])) {
@@ -129,7 +131,7 @@ module.exports = function(pathToUse, options) {
   };
 
   var getIdFromKey = function(key) {
-    if(_.isString(key) && key.length >= 0 ) {
+    if(isValidKey(key)) {
       return _keys.get(key);
     }
     return undefined;
@@ -140,19 +142,19 @@ module.exports = function(pathToUse, options) {
   index_cache[pathToUse] = {
     /** Clear the entire index */
     clear: function() {
-      _keys = new StringMap();
+      _keys = new Map();
       _counter = 0;
       _.times(CHARS.length, (i) => _idx[i] = {} );
       flush();
     },
 
     /**
-    Expects a key string and value string as parameters. These will be added to
+    Expects a key as a non empty string or numeric non empty value string as parameters. These will be added to
     the internal index
     */
     put : function(key, value) {
-      if(!_.isString(key) || !_.isString(value) ||
-        key.length === 0 || value.length === 0) {
+      if(!isValidKey(key) || 
+         !_.isString(value) || value.length === 0) {
         return;
       }
 
@@ -175,7 +177,7 @@ module.exports = function(pathToUse, options) {
       if(!_.isUndefined(id)) {
         var idx = getIndexForId(id);
         if(!_.isUndefined(idx[id])) {
-          return idx[id].items();
+          return Array.from(idx[id].values());
         }
       }
       return [];
@@ -189,12 +191,12 @@ module.exports = function(pathToUse, options) {
         if(!_.isUndefined(idx[id])) {
           delete idx[id];
         }
-        _keys.remove(key);
+        _keys.delete(key);
         throttled_flush();
       }
     },
 
-    /** Update a key is remove then put */
+    /** Update a key is delete then put */
     update : function(key, value) {
       this.delete(key);
       this.put(key, value);
@@ -205,33 +207,48 @@ module.exports = function(pathToUse, options) {
     Only a list of keys is returned which then can be used to lookup the values.
     **/
     search : function(searchStr) {
-      var keys = _keys.keys();
-      return _.filter(keys, function(item){ return item.indexOf(searchStr) >= 0; });
+      let filtered = [];
+      _keys.forEach(function(i, key) { 
+        // Sometimes the key is numeric, but should still be searchable?
+        if ((''+key).indexOf(searchStr) >= 0) {
+          filtered.push(key);
+        }
+      });
+      return filtered;
     },
+
     /**
     The list of stored keys
     */
     keys : function() {
-      return _keys.keys();
+      let keys = [];
+      let it = _keys.keys();
+      let result = it.next();
+      while (!result.done) {
+        keys.push(result.value)
+        result = it.next();
+      }
+      return keys;
     },
+
     /** Return the number of keys in the index */
     size : function() {
       return _counter;
     },
+    
     /**
     The index is returned as a json object
     */
     toJSON : function() {
       var obj = {};
-      var keys = _keys.keys();
-      for(var x in keys) {
-        var key = keys[x];
+      _keys.forEach((_v, key) => {
         obj[key] = this.get(key);
-      }
+      });
       return obj;
     },
+
     /**
-    The flush method is internal and should not be called externally
+    The flush method should be called before process exit
     **/
     flush: function(force) {
       if(force) {

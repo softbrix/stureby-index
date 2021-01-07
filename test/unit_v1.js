@@ -44,6 +44,18 @@ describe('Shatabang Index', function() {
 
         assert.deepEqual([VAL1], idx.get(KEY));
       });
+
+      it('should be able to return index as JSON', () => {
+        var expected = {
+            as: [ 'the beste1' ],
+            asa: [ 'the beste2', 'the beste1', 'the beste3' ],
+            asas: [ 'the beste3' ],
+            asasas: [ 'the beste4' ],
+            '*$HDv>J7{$}s&N*+Gm=sZ@+9E!W:L)!ZhT)?SofkHM^{YKE&FTADDFRErY%YDvfprAd-)[DWp6/u$9+@zFJ%1xLq{gBz+/cx(4D]H<ixour7fiuT[.AHJcZgurQAf': [ 'val1' ]
+          };
+    
+          assert.deepEqual(expected, idx.toJSON());
+      });
     });
   });
 });

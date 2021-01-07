@@ -25,13 +25,25 @@ describe('Shatabang Index', function() {
     assert.equal(4, idx.size());
   });
 
+  it('should handle numeric put in different keys', () => {
+    let init = idx.size();
+
+    idx.put(123, 'the beste1');
+    idx.put(456, 'the beste2');
+    idx.put(543, 'the beste3');
+    idx.put(Number.MAX_VALUE, 'the beste4');
+
+    assert.equal(init + 4, idx.keys().length);
+    assert.equal(init + 4, idx.size());
+  });
+
   it('should handle wide search in different keys', () => {
     idx.put('as', 'the beste1');
     idx.put('asa', 'the beste2');
     idx.put('asas', 'the beste3');
     idx.put('asasas', 'the beste4');
 
-    assert.equal(2, idx.search('asas').length);
+    assert.strictEqual(idx.search('asas').length, 2);
   });
 
   it('should handle put with same key', () => {
@@ -43,7 +55,19 @@ describe('Shatabang Index', function() {
     idx.put(KEY, VAL2);
     idx.put(KEY, VAL3);
 
-    assert.deepEqual([VAL2, VAL1, VAL3], idx.get(KEY));
+    assert.deepEqual([VAL1, VAL2, VAL3], idx.get(KEY).sort());
+  });
+
+  it('should handle put with same numeric key', () => {
+    const KEY = Math.PI;
+    const VAL1 = 'the beste1';
+    const VAL2 = 'the beste2';
+    const VAL3 = 'the beste3';
+    idx.put(KEY, VAL1);
+    idx.put(KEY, VAL2);
+    idx.put(KEY, VAL3);
+
+    assert.deepEqual([VAL1, VAL2, VAL3], idx.get(KEY).sort());
   });
 
   it('should handle put with complex key', () => {
@@ -52,18 +76,6 @@ describe('Shatabang Index', function() {
     idx.put(KEY, VAL1);
 
     assert.deepEqual([VAL1], idx.get(KEY));
-  });
-
-  it('should be able to return index as JSON', () => {
-    var expected = {
-        as: [ 'the beste1' ],
-        asa: [ 'the beste2', 'the beste1', 'the beste3' ],
-        asas: [ 'the beste3' ],
-        asasas: [ 'the beste4' ],
-        '*$HDv>J7{$}s&N*+Gm=sZ@+9E!W:L)!ZhT)?SofkHM^{YKE&FTADDFRErY%YDvfprAd-)[DWp6/u$9+@zFJ%1xLq{gBz+/cx(4D]H<ixour7fiuT[.AHJcZgurQAf': [ 'val1' ]
-      };
-
-      assert.deepEqual(expected, idx.toJSON());
   });
 
   it('should handle delete by valid key', () => {

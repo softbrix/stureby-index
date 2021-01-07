@@ -14,14 +14,14 @@ describe('Shatabang Noop Index', function() {
   });
 
   it('should handle put in different keys', () => {
-    assert.equal(0, idx.keys().length);
+    assert.equal(0, idx.size());
 
     idx.put('as', 'the beste1');
     idx.put('asa', 'the beste2');
     idx.put('asas', 'the beste3');
     idx.put('asasas', 'the beste4');
 
-    assert.equal(4, idx.keys().length);
+    assert.equal(4, idx.size());
   });
 
   it('should handle wide search in different keys', () => {
