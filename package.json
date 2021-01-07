@@ -1,6 +1,6 @@
 {
   "name": "stureby-index",
-  "version": "3.1.4",
+  "version": "3.2.0",
   "description": "A simple index which will be persisted on the disk during runtime.",
   "main": "index.js",
   "scripts": {
