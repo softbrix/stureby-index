@@ -1,5 +1,4 @@
 var assert = require('assert');
-var _ = require('underscore');
 var fs = require('fs');
 var shIndex = require('../index.js');
 

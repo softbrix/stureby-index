@@ -1,5 +1,4 @@
 var assert = require('assert');
-var _ = require('underscore');
 var fs = require('fs-extra');
 var shIndex = require('../index.js');
 
@@ -141,10 +140,8 @@ describe('Shatabang Index', function() {
   it('should handle put plenty items in single file', () => {
     var k = "D5320";
     const noOfItems = 10000;
-    _.times(noOfItems, function(n) {
-        var v = (Math.random() * 10e20).toString(36);
-      idx.put(k, v);
-    });
+
+    putRandomValues(idx, noOfItems, k);
 
     assert.equal(noOfItems, idx.get(k).length);
     assert.equal(1, idx.search(k).length);
@@ -155,15 +152,7 @@ describe('Shatabang Index', function() {
     const PREV_KEY_LENGTH = idx.keys().length;
 
     /* Fill with garbage **/
-    _.times(noOfItems, function(n) {
-      var k = (Math.random() * 10e20).toString(36).substring(0,_.random(2, 20));
-      k += new Date().getTime();
-
-      _.times(200, function(n) {
-        var v = (Math.random() * 10e20).toString(36);
-        idx.put(k, v);
-      });
-    });
+    generateAndStoreRandomValues(idx, noOfItems, 200);
 
     assert.equal(PREV_KEY_LENGTH + noOfItems, idx.keys().length);
   });
@@ -192,16 +181,9 @@ describe('Shatabang Index', function() {
     const idx = shIndex('./test/data_big');
     it('should distribute random data with single value on same key', () => {
       var noOfItems = 20000;
-      var id_suffix = 0;  // To secure the uniqueness
 
       /* Fill with garbage **/
-      _.times(noOfItems, function(n) {
-        var k = (Math.random() * 10e20).toString(36).substring(0,_.random(2, 20));
-        k += id_suffix++;
-        var v = (Math.random() * 10e20).toString(36);
-        idx.put(k, v);
-
-      });
+      generateAndStoreRandomValues(idx, noOfItems, 1);
 
       assert.equal(noOfItems, idx.keys().length);
     });
@@ -218,4 +200,21 @@ describe('Shatabang Index', function() {
         assert.equal(0, idx_cleared.keys().length);
     });
   });
+
+  function putRandomValues(idx, times, key) {
+    for (let n = 0; n < times; n++) {
+        var value = (Math.random() * 10e20).toString(36);
+        idx.put(key, value);
+    }
+  }
+  
+  var idx_suffix = 0;
+  function generateAndStoreRandomValues(idx, count, valuesPerKey) {
+    for (let n = 0; n < count; n++) {
+      var k = (Math.random() * 10e20).toString(36).substring(0, Math.floor(Math.random() * (20 - 2 + 1)) + 2);
+      k += idx_suffix++;
+  
+      putRandomValues(idx, valuesPerKey, k);
+    }
+  }
 });

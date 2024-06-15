@@ -4,23 +4,26 @@ This file describes the index module for the keyword store and lookup
 
 The index stores all information to the file system.
 */
-
-var _ = require('underscore');
 var fileStorage = require('./file_storage');
 var noopStorage = require('./noop_storage');
+var { throttle } = require('throttle-debounce');
 
 const IDX_VERSION = 2;
 const CHARS='abcdefghijklmnopqrstuvwxyz';
 
+function isUndefined(obj) {
+  return obj === void 0;
+}
+
 var addValue = function(idx, key, value) {
-  if(_.isUndefined(idx[key])) {
+  if(isUndefined(idx[key])) {
     idx[key] = new Set();
   }
   idx[key].add(value);
 };
 
 var isValidKey = function(key) {
-  return _.isNumber(key) || _.isString(key) && key.trim().length > 0
+  return typeof key === 'number' || (typeof key === 'string' && key.trim().length > 0)
 }
 
 const index_cache = {};
@@ -33,8 +36,8 @@ module.exports = function(pathToUse, options) {
 
   options = options || {};
   var storage;
-  if(_.isUndefined(options.storageFactory)) {
-    if(_.isUndefined(options.persist) || options.persist) {
+  if(isUndefined(options.storageFactory)) {
+    if(isUndefined(options.persist) || options.persist) {
         storage = fileStorage(pathToUse);
     } else {
       storage = noopStorage();
@@ -51,8 +54,8 @@ module.exports = function(pathToUse, options) {
     try {
       var idx = {};
       var block = storage.readBlock(blockName);
-      _.each(block, function(list, key) {
-        list.forEach(function(value) {
+      Object.keys(block).forEach(key => {
+        block[key].forEach(value => {
           addValue(idx, key, value);
         });
       });
@@ -69,7 +72,7 @@ module.exports = function(pathToUse, options) {
 
   var getIndexForId = function(id) {
     var i = (id % CHARS.length);
-    if(_.isUndefined(_idx[i])) {
+    if(isUndefined(_idx[i])) {
       _idx[i] = readBlock(getBlockFromIndex(i));
     }
     return _idx[i];
@@ -82,21 +85,22 @@ module.exports = function(pathToUse, options) {
 
   // Load old master key block
   var parsed = storage.readMasterBlock();
-  if(!_.isUndefined(parsed)) {
-    if(_.isUndefined(parsed.version)) {
+  if(!isUndefined(parsed)) {
+    if(isUndefined(parsed.version)) {
       // Version 1
       parsed.forEach(function(itm) {
         _keys.set(itm, ++_counter);
       });
-      _.times(CHARS.length, (i) => {
+      for (let i = 0; i < CHARS.length; i++) {
         var oldIndex = readBlock(getBlockFromIndex(i));
-        _.each(oldIndex, function(keySet, key) {
+        Object.keys(oldIndex).forEach(key => {
+          var keySet = oldIndex[key];
           var id = _keys.get(key);
 
           var idx = getIndexForId(id);
           keySet.forEach(value => addValue(idx, id, value));
         });
-      });
+      }
     } else {
       // Version 2
       parsed.items.forEach(function(itm) {
@@ -105,29 +109,28 @@ module.exports = function(pathToUse, options) {
     }
   }
   _counter = _keys.size;
-
   var getIndexAsList = function(index) {
     var list = {};
-    _.each(index, function(keySet, key) {
-      this[key] = keySet.values();
-    }, list);
+    Object.entries(index).forEach(([key, keySet]) => {
+      list[key] = keySet.values();
+    });
     return list;
   };
 
   var flush = function() {
     storage.writeMasterBlock(Array.from(_keys), IDX_VERSION);
-    _.times(CHARS.length, function(i) {
+    for (let i = 0; i < CHARS.length; i++) {
       const block = getBlockFromIndex(i);
-      if(_.isUndefined(_idx[i])) {
+      if (isUndefined(_idx[i])) {
         // Ignore non loaded blocks
-        return;
+        continue;
       }
-      if(_.isEmpty(_idx[i])) {
+      if (Object.keys(_idx[i]).length === 0) {
         storage.clearBlock(block);
-        return;
+        continue;
       }
       storage.writeBlock(getIndexAsList(_idx[i]), block);
-    });
+    }
   };
 
   var getIdFromKey = function(key) {
@@ -137,14 +140,16 @@ module.exports = function(pathToUse, options) {
     return undefined;
   }
 
-  var throttled_flush = _.throttle(flush, options.flushTime);
+  var throttled_flush = throttle(options.flushTime, flush);
 
   index_cache[pathToUse] = {
     /** Clear the entire index */
     clear: function() {
       _keys = new Map();
       _counter = 0;
-      _.times(CHARS.length, (i) => _idx[i] = {} );
+      for (let i = 0; i < CHARS.length; i++) {
+        _idx[i] = {};
+      }
       flush();
     },
 
@@ -154,7 +159,7 @@ module.exports = function(pathToUse, options) {
     */
     put : function(key, value) {
       if(!isValidKey(key) || 
-         !_.isString(value) || value.length === 0) {
+         typeof value !== 'string' || value.length === 0) {
         return;
       }
 
@@ -174,9 +179,9 @@ module.exports = function(pathToUse, options) {
      */
     get : function(key) {
       var id = getIdFromKey(key);
-      if(!_.isUndefined(id)) {
+      if(!isUndefined(id)) {
         var idx = getIndexForId(id);
-        if(!_.isUndefined(idx[id])) {
+        if(!isUndefined(idx[id])) {
           return Array.from(idx[id].values());
         }
       }
@@ -186,9 +191,9 @@ module.exports = function(pathToUse, options) {
     /* Delete a key */
     delete: function(key) {
       var id = getIdFromKey(key);
-      if(!_.isUndefined(id)) {
+      if(!isUndefined(id)) {
         var idx = getIndexForId(id);
-        if(!_.isUndefined(idx[id])) {
+        if(!isUndefined(idx[id])) {
           delete idx[id];
         }
         _keys.delete(key);

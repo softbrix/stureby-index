@@ -1,5 +1,4 @@
 
-var _ = require('underscore');
 var fs = require('fs-extra');
 var path = require('path');
 var touch = require("touch");
@@ -37,7 +36,7 @@ module.exports = function(pathToUse) {
     readBlock : function(block) {
       const fileName = blockFileName(block);
       var data = fs.readFileSync(fileName, DEFAULT_ENCODING);
-      if(_.isEmpty(data)) {
+      if(!data) {
         return {};
       }
       return JSON.parse(data);
@@ -49,7 +48,7 @@ module.exports = function(pathToUse) {
     },
     readMasterBlock : function() {
       var data = fs.readFileSync(getMasterKeyFile(), DEFAULT_ENCODING);
-      if(!_.isEmpty(data)) {
+      if(data !== '') {
         return JSON.parse(data);
       }
       return undefined;
