@@ -52,6 +52,14 @@ describe('Shatabang Index writer', function() {
     assert.deepEqual([VAL1], idx.get(KEY));
   });
 
+  it('should be able to put path as key', () => {
+    const KEY = '2023/12/21/08340403.jpeg';
+    const VAL1 = 'thiz waz valid';
+    idx.put(KEY, VAL1);
+
+    assert.equal(VAL1, idx.get(KEY));
+  });
+
   it('should be able to flush to disk', () => {
       return idx.flush(true);
   });

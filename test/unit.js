@@ -4,7 +4,8 @@ var shIndex = require('../index.js');
 
 
 describe('Shatabang Index', function() {
-  const idx = shIndex('./test/data');
+  const DEFAULT_IDX_PATH = './test/data';
+  const idx = shIndex(DEFAULT_IDX_PATH);
 
   it('should return empty array for unknown key', function() {
     assert.equal(0, idx.size());
@@ -162,9 +163,7 @@ describe('Shatabang Index', function() {
   });
 
   describe('simultaneous read and write', function() {
-    const PATH = './test/data';
-    //const idx = shIndex(PATH);
-    const idx2 = shIndex(PATH);
+    const idx2 = shIndex(DEFAULT_IDX_PATH);
 
     it('should be able to sync data between instances in same process', () => {
       const KEY = 'Netflix';
@@ -198,6 +197,16 @@ describe('Shatabang Index', function() {
         // Reload the index
         const idx_cleared = shIndex('./test/data_big');
         assert.equal(0, idx_cleared.keys().length);
+    });
+  });
+
+  describe('error handling', function() {
+    it('should not be able to put empty key', () => {
+        assert.throws(() => { idx.put('', 'value'); }, Error, "Error thrown");
+    });
+
+    it('should not be able to put empty value', () => {
+      assert.throws(() => { idx.put('key', ''); }, Error, "Error thrown");
     });
   });
 

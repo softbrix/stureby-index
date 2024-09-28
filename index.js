@@ -15,15 +15,19 @@ function isUndefined(obj) {
   return obj === void 0;
 }
 
-var addValue = function(idx, key, value) {
+const addValue = function(idx, key, value) {
   if(isUndefined(idx[key])) {
     idx[key] = new Set();
   }
   idx[key].add(value);
 };
 
-var isValidKey = function(key) {
+const isValidKey = function(key) {
   return typeof key === 'number' || (typeof key === 'string' && key.trim().length > 0)
+}
+
+const isValidValue = function(value) {
+  return typeof value === 'string' && value.length > 0
 }
 
 const index_cache = {};
@@ -158,9 +162,10 @@ module.exports = function(pathToUse, options) {
     the internal index
     */
     put : function(key, value) {
-      if(!isValidKey(key) || 
-         typeof value !== 'string' || value.length === 0) {
-        return;
+      if(!isValidKey(key)) {
+        throw new Error('Expected key as number or non empty string');
+      } else if (!isValidValue(value)) {
+        throw new Error('Expected value to be non empty string');
       }
 
       var id = _keys.get(key);
@@ -178,6 +183,9 @@ module.exports = function(pathToUse, options) {
      Return all items for the matching key
      */
     get : function(key) {
+      if(!isValidKey(key)) {
+        throw new Error('Expected number or string as key');
+      }
       var id = getIdFromKey(key);
       if(!isUndefined(id)) {
         var idx = getIndexForId(id);
@@ -190,6 +198,9 @@ module.exports = function(pathToUse, options) {
 
     /* Delete a key */
     delete: function(key) {
+      if(!isValidKey(key)) {
+        throw new Error('Expected number or string as key');
+      }
       var id = getIdFromKey(key);
       if(!isUndefined(id)) {
         var idx = getIndexForId(id);
