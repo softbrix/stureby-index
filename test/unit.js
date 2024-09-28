@@ -2,6 +2,15 @@ var assert = require('assert');
 var fs = require('fs-extra');
 var shIndex = require('../index.js');
 
+const waitForFileRemove = async (filePath, maxWaitTime) => {
+  const startTime = new Date().getTime();
+  do {
+    if (fs.existsSync(filePath)) return true;
+    // wait for 1 second
+    await new Promise((resolve, reject) => setTimeout(() => resolve(true), 1000));
+  } while(startTime + maxWaitTime < new Date().getTime());
+  return false;
+}
 
 describe('Shatabang Index', function() {
   const DEFAULT_IDX_PATH = './test/data';
@@ -92,7 +101,7 @@ describe('Shatabang Index', function() {
     assert.deepEqual([], idx.get(KEY));
   });
 
-  it('should handle delete by valid key with flush', () => {
+  it('should handle delete by valid key with flush', async () => {
     const KEY = 'DELTE_ME',
       INDEX = './test/dataDelete',
       IDX_KEY_FILE = INDEX + '/__allKeys',
@@ -104,7 +113,8 @@ describe('Shatabang Index', function() {
     assert.equal(true, fs.existsSync(IDX_FILE))
     assert.equal(38, fs.readFileSync(IDX_KEY_FILE).length);
     idx.delete(KEY);
-    assert.equal(false, fs.existsSync(IDX_FILE))
+    await waitForFileRemove(IDX_FILE, 2000);
+    assert.equal(false, fs.existsSync(IDX_FILE));
     assert.equal(24, fs.readFileSync(IDX_KEY_FILE).length);
   });
 
